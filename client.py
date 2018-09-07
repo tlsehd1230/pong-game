@@ -1,7 +1,7 @@
 import pygame
 import socket
 
-server_IP = "127.0.0.1"
+server_IP = "192.168.0.11"
 server_PORT = 20000
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.sendto("client-connected".encode(), (server_IP, server_PORT))
