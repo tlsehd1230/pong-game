@@ -1,8 +1,12 @@
 import pygame
 import socket
+import threading
 
-server_IP = "192.168.0.11"
+server_IP = "27.119.27.75"
 server_PORT = 20000
+
+clck = pygame.time.Clock()
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.sendto("client-connected".encode(), (server_IP, server_PORT))
 
@@ -14,7 +18,18 @@ surface = pygame.display.set_mode((display_width, display_height))
 
 pygame.display.set_caption("pong-game")
 
+def listen(sock, data_list) :
+    while True :
+        data, addr = sock.recvfrom(1024)
+        data_list[0] = int(data.decode())
+
 def main() :
+
+    data_list = [0]
+
+    t1 = threading.Thread(target = listen, args = (sock, data_list))
+    t1.start()
+
     gameover = False
 
     while not gameover :
@@ -28,7 +43,15 @@ def main() :
                 if event.key == pygame.K_DOWN :
                     sock.sendto("DOWN".encode(), (server_IP, server_PORT))
 
+        #data, addr = sock.recvfrom(10)
+        #print(int(data.decode()))
+
+        surface.fill((0, 0, 0))
+
+        pygame.draw.rect(surface, (255, 255, 255), (data_list[0], 300, 10, 10))
+
         pygame.display.update()
+        clck.tick(30)
 
     sock.close()
 
