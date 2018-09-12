@@ -2,7 +2,7 @@ import pygame
 import socket
 import threading
 
-server_IP = "27.119.27.75"
+server_IP = "127.0.0.1"
 server_PORT = 20000
 
 clck = pygame.time.Clock()
@@ -31,6 +31,9 @@ def main() :
     t1.start()
 
     gameover = False
+    nomovement = True
+    UP = False
+    DOWN = False
 
     while not gameover :
         for event in pygame.event.get() :
@@ -38,10 +41,24 @@ def main() :
                 gameover = True
 
             if event.type == pygame.KEYDOWN :
+                nomovement = False
                 if event.key == pygame.K_UP :
-                    sock.sendto("UP".encode(), (server_IP, server_PORT))
-                if event.key == pygame.K_DOWN :
-                    sock.sendto("DOWN".encode(), (server_IP, server_PORT))
+                    UP = True
+                    DOWN = False
+                if event.key == pygame.K_DOWN:
+                    UP = False
+                    DOWN = True
+
+            if event.type == pygame.KEYUP :
+                nomovement = True
+                UP = False
+                DOWN = False
+
+        if not nomovement :
+            if UP :
+                sock.sendto("UP".encode(), (server_IP, server_PORT))
+            if DOWN :
+                sock.sendto("DOWN".encode(), (server_IP, server_PORT))
 
         #data, addr = sock.recvfrom(10)
         #print(int(data.decode()))
