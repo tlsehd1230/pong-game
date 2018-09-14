@@ -13,15 +13,14 @@ def keyboard_listen(sock, clnt_address, paddle1, paddle2) :
         data, addr = sock.recvfrom(1024)
         if addr == clnt_address[0] :
             if data.decode() == "UP" :
-                paddle1.pos_y += 5
-            if data.decode() == "DOWN" :
                 paddle1.pos_y -= 5
+            if data.decode() == "DOWN" :
+                paddle1.pos_y += 5
         elif addr == clnt_address[1] :
             if data.decode() == "UP":
-                paddle2.pos_y += 5
-            if data.decode() == "DOWN":
                 paddle2.pos_y -= 5
-        print(paddle1.pos_y,"    " , paddle2.pos_y)
+            if data.decode() == "DOWN":
+                paddle2.pos_y += 5
 
 def init(sock) :
     players_List = []
@@ -33,21 +32,17 @@ def init(sock) :
             print("2 client connected")
             return players_List
 
-def sendstring(sock, addr) :
-    clck = pygame.time.Clock()
-    num = 0
+def send_pos(sock, paddle1, paddle2, addr) :
     while True :
-        sock.sendto(str(num).encode(), addr)
-        num += 5
-        clck.tick(30)
+        sock.sendto((str(paddle1.pos_y)+","+str(paddle2.pos_y)).encode(), addr)
 
 clnt_address = init(sock)
 paddle1 = Point()
 paddle2 = Point()
 
 t1 = threading.Thread(target = keyboard_listen, args = (sock, clnt_address, paddle1, paddle2))
-t2 = threading.Thread(target = sendstring, args = (sock, clnt_address[0]))
-t3 = threading.Thread(target = sendstring, args = (sock, clnt_address[1]))
+t2 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[0]))
+t3 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[1]))
 
 t1.start()
 t2.start()

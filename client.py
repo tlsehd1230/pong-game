@@ -1,6 +1,7 @@
 import pygame
 import socket
 import threading
+from point import Point
 
 server_IP = "127.0.0.1"
 server_PORT = 20000
@@ -18,22 +19,30 @@ surface = pygame.display.set_mode((display_width, display_height))
 
 pygame.display.set_caption("pong-game")
 
-def listen(sock, data_list) :
+def listen(sock, player1, player2) :
     while True :
         data, addr = sock.recvfrom(1024)
-        data_list[0] = int(data.decode())
+        result_list = data.decode().split(",")
+        result_list = list(map(int, result_list))
+        player1.pos_y = result_list[0]
+        player2.pos_y = result_list[1]
 
 def main() :
-
-    data_list = [0]
-
-    t1 = threading.Thread(target = listen, args = (sock, data_list))
-    t1.start()
 
     gameover = False
     nomovement = True
     UP = False
     DOWN = False
+    player1 = Point()
+    player2 = Point()
+    player1.pos_x = 20
+    player2.pos_x = 770
+    player1.pos_y = 275
+    player2.pos_y = 275
+
+
+    t1 = threading.Thread(target=listen, args=(sock, player1, player2))
+    t1.start()
 
     while not gameover :
         for event in pygame.event.get() :
@@ -65,7 +74,8 @@ def main() :
 
         surface.fill((0, 0, 0))
 
-        pygame.draw.rect(surface, (255, 255, 255), (data_list[0], 300, 10, 10))
+        pygame.draw.rect(surface, (255, 255, 255), (player1.pos_x, player1.pos_y , 10, 50))
+        pygame.draw.rect(surface, (255, 255, 255), (player2.pos_x, player2.pos_y, 10, 50))
 
         pygame.display.update()
         clck.tick(30)
