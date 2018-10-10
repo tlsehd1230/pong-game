@@ -19,13 +19,15 @@ surface = pygame.display.set_mode((display_width, display_height))
 
 pygame.display.set_caption("pong-game")
 
-def listen(sock, player1, player2) :
+def listen(sock, player1, player2, ball) :
     while True :
         data, addr = sock.recvfrom(1024)
         result_list = data.decode().split(",")
         result_list = list(map(int, result_list))
         player1.pos_y = result_list[0]
         player2.pos_y = result_list[1]
+        ball.pos_x = result_list[2]
+        ball.pos_y = result_list[3]
 
 def main() :
 
@@ -35,13 +37,15 @@ def main() :
     DOWN = False
     player1 = Point()
     player2 = Point()
+    ball = Point()
     player1.pos_x = 20
     player2.pos_x = 770
     player1.pos_y = 275
     player2.pos_y = 275
+    ball.pos_x = 400
+    ball.pos_y = 300
 
-
-    t1 = threading.Thread(target=listen, args=(sock, player1, player2))
+    t1 = threading.Thread(target=listen, args=(sock, player1, player2, ball))
     t1.start()
 
     while not gameover :
@@ -63,19 +67,21 @@ def main() :
                 UP = False
                 DOWN = False
 
+            #if event.type == pygame.MOUSEBUTTONUP :
+            #    sock.sendto("START".encode(), (server_IP, server_PORT))
+
         if not nomovement :
             if UP :
                 sock.sendto("UP".encode(), (server_IP, server_PORT))
             if DOWN :
                 sock.sendto("DOWN".encode(), (server_IP, server_PORT))
 
-        #data, addr = sock.recvfrom(10)
-        #print(int(data.decode()))
-
         surface.fill((0, 0, 0))
 
         pygame.draw.rect(surface, (255, 255, 255), (player1.pos_x, player1.pos_y , 10, 50))
         pygame.draw.rect(surface, (255, 255, 255), (player2.pos_x, player2.pos_y, 10, 50))
+
+        pygame.draw.rect(surface, (255, 255, 255), (ball.pos_x-5, ball.pos_y-5, 10, 10))
 
         pygame.display.update()
         clck.tick(30)

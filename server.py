@@ -2,6 +2,15 @@ import socket
 import threading
 import pygame
 from point import Point
+import time
+
+class Ball:
+    def __init__(self) :
+        self.ballposX = 400
+        self.ballposY = 300
+        self.speedX = -5
+        self.speedY = 5
+        self.nextdirection = -1
 
 server_IP = "127.0.0.1"
 server_PORT = 20000
@@ -32,18 +41,39 @@ def init(sock) :
             print("2 client connected")
             return players_List
 
-def send_pos(sock, paddle1, paddle2, addr) :
+def send_pos(sock, paddle1, paddle2, addr, ball) :
     while True :
-        sock.sendto((str(paddle1.pos_y)+","+str(paddle2.pos_y)).encode(), addr)
+        sock.sendto((str(paddle1.pos_y)+","+str(paddle2.pos_y)+","+str(ball.ballposX)+","+str(ball.ballposY)).encode(), addr)
+
 
 clnt_address = init(sock)
 paddle1 = Point()
 paddle2 = Point()
+ball = Ball()
+paddle1.pos_y = 275
+paddle2.pos_y = 275
+clck = pygame.time.Clock()
+
 
 t1 = threading.Thread(target = keyboard_listen, args = (sock, clnt_address, paddle1, paddle2))
-t2 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[0]))
-t3 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[1]))
+t2 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[0], ball))
+t3 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[1], ball))
 
 t1.start()
 t2.start()
 t3.start()
+
+while True :
+    ball.ballposX += ball.speedX
+    ball.ballposY += ball.speedY
+
+    if ball.ballposY <= 5 or ball.ballposY >= 595 :
+        ball.speedY *= -1
+
+    if ball.ballposX <= 0 or ball.ballposX >= 790 :
+        ball.ballposX = 400
+        ball.ballposY = 300
+        ball.speedX = 0
+        ball.speedY = 0
+
+    clck.tick(30)
