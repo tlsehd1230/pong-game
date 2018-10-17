@@ -43,6 +43,8 @@ def main() :
     nomovement = True
     UP = False
     DOWN = False
+    UP2 = False
+    DOWN2 = False
     player1 = Point()
     player2 = Point()
     ball = Point()
@@ -71,11 +73,19 @@ def main() :
                 if event.key == pygame.K_DOWN:
                     UP = False
                     DOWN = True
+                if event.key == pygame.K_q :
+                    UP2 = True
+                    DOWN2 = False
+                if event.key == pygame.K_a :
+                    UP2 = False
+                    DOWN2 = True
 
             if event.type == pygame.KEYUP :
                 nomovement = True
                 UP = False
                 DOWN = False
+                UP2 = False
+                DOWN2 =False
 
             #if event.type == pygame.MOUSEBUTTONUP :
             #    sock.sendto("START".encode(), (server_IP, server_PORT))
@@ -85,6 +95,10 @@ def main() :
                 sock.sendto("UP".encode(), (server_IP, server_PORT))
             if DOWN :
                 sock.sendto("DOWN".encode(), (server_IP, server_PORT))
+            if UP2 :
+                sock.sendto("UP2".encode(), (server_IP, server_PORT))
+            if DOWN2 :
+                sock.sendto("DOWN2".encode(), (server_IP, server_PORT))
 
         surface.fill((0, 0, 0))
 

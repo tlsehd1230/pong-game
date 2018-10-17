@@ -26,9 +26,9 @@ def keyboard_listen(sock, clnt_address, paddle1, paddle2) :
             if data.decode() == "DOWN" :
                 paddle1.pos_y += 5
         elif addr == clnt_address[1] :
-            if data.decode() == "UP":
+            if data.decode() == "UP" :
                 paddle2.pos_y -= 5
-            if data.decode() == "DOWN":
+            if data.decode() == "DOWN" :
                 paddle2.pos_y += 5
 
 def init(sock) :
