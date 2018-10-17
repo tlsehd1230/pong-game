@@ -3,13 +3,13 @@ import socket
 import threading
 from point import Point
 
-server_IP = "127.0.0.1"
-server_PORT = 20000
+server_IP = input("ip주소를 입력하세요: ")
+server_PORT = int(input("포트주소를 입력하세요: "))
 
 clck = pygame.time.Clock()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.sendto("client-connected".encode(), (server_IP, server_PORT))
+#sock.sendto("client-connected".encode(), (server_IP, server_PORT))
 
 pygame.init()
 
@@ -33,7 +33,6 @@ def listen(sock, player1, player2, ball, score_list) :
         else :
             result_list2 = data.decode().split(",")
             result_list2 = list(map(int, result_list2))
-            print(data.decode())
             score_list[0] = result_list2[0]
             score_list[1] = result_list2[1]
 
@@ -43,8 +42,10 @@ def main() :
     nomovement = True
     UP = False
     DOWN = False
-    UP2 = False
-    DOWN2 = False
+    STARTED = False
+    thread_running = False
+    WIN1 = False
+    WIN2 = False
     player1 = Point()
     player2 = Point()
     ball = Point()
@@ -58,12 +59,19 @@ def main() :
     font_40 = pygame.font.SysFont("D2Coding", 40)
 
     t1 = threading.Thread(target=listen, args=(sock, player1, player2, ball, score_list))
-    t1.start()
 
     while not gameover :
+        if STARTED and not thread_running:
+            t1.start()
+            thread_running = True
+
         for event in pygame.event.get() :
             if event.type == pygame.QUIT :
                 gameover = True
+
+            if event.type == pygame.MOUSEBUTTONDOWN :
+                sock.sendto("START".encode(), (server_IP, server_PORT))
+                STARTED = True
 
             if event.type == pygame.KEYDOWN :
                 nomovement = False
@@ -73,32 +81,17 @@ def main() :
                 if event.key == pygame.K_DOWN:
                     UP = False
                     DOWN = True
-                if event.key == pygame.K_q :
-                    UP2 = True
-                    DOWN2 = False
-                if event.key == pygame.K_a :
-                    UP2 = False
-                    DOWN2 = True
 
             if event.type == pygame.KEYUP :
                 nomovement = True
                 UP = False
                 DOWN = False
-                UP2 = False
-                DOWN2 =False
-
-            #if event.type == pygame.MOUSEBUTTONUP :
-            #    sock.sendto("START".encode(), (server_IP, server_PORT))
 
         if not nomovement :
             if UP :
                 sock.sendto("UP".encode(), (server_IP, server_PORT))
             if DOWN :
                 sock.sendto("DOWN".encode(), (server_IP, server_PORT))
-            if UP2 :
-                sock.sendto("UP2".encode(), (server_IP, server_PORT))
-            if DOWN2 :
-                sock.sendto("DOWN2".encode(), (server_IP, server_PORT))
 
         surface.fill((0, 0, 0))
 
@@ -107,7 +100,26 @@ def main() :
 
         pygame.draw.rect(surface, (255, 255, 255), (ball.pos_x-5, ball.pos_y-5, 10, 10))
 
+        score_label = font_40.render(str(score_list[0]), True, (255, 255, 255))
+        surface.blit(score_label, (200, 50))
+        score_label2 = font_40.render(str(score_list[1]), True, (255, 255, 255))
+        surface.blit(score_label2, (600, 50))
 
+        if score_list[0] == 11 :
+            WIN1 = True
+
+        if score_list[1] == 11 :
+            WIN2 = True
+
+        if WIN1 :
+            surface.fill((0, 0, 0))
+            winner_label = font_40.render("PLAYER 1 WIN", True, (255, 255, 255))
+            surface.blit(winner_label, (400, 300))
+
+        if WIN2 :
+            surface.fill((0, 0, 0))
+            winner_label2 = font_40.render("PLAYER 2 WIN", True, (255, 255, 255))
+            surface.blit(winner_label2, (400, 300))
 
         pygame.display.update()
         clck.tick(30)

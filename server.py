@@ -8,8 +8,8 @@ class Ball :
     def __init__(self) :
         self.ballposX = 400
         self.ballposY = 300
-        self.speedX = 5
-        self.speedY = 5
+        self.speedX = 7
+        self.speedY = 7
         self.nextdirection = -1
 
 server_IP = "127.0.0.1"
@@ -22,14 +22,14 @@ def keyboard_listen(sock, clnt_address, paddle1, paddle2) :
         data, addr = sock.recvfrom(1024)
         if addr == clnt_address[0] :
             if data.decode() == "UP" :
-                paddle1.pos_y -= 5
+                paddle1.pos_y -= 7
             if data.decode() == "DOWN" :
-                paddle1.pos_y += 5
+                paddle1.pos_y += 7
         elif addr == clnt_address[1] :
             if data.decode() == "UP" :
-                paddle2.pos_y -= 5
+                paddle2.pos_y -= 7
             if data.decode() == "DOWN" :
-                paddle2.pos_y += 5
+                paddle2.pos_y += 7
 
 def init(sock) :
     players_List = []
@@ -84,10 +84,10 @@ while True :
         sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[0])
         sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[1])
 
-    if (ball.ballposX >= 760 and ball.ballposY >= paddle2.pos_y - 10) and (ball.ballposX >= 770 and ball.ballposY <= paddle2.pos_y + 60) :
+    if (ball.ballposX == 765 and ball.ballposY > paddle2.pos_y - 5 ) and (ball.ballposX == 765 and ball.ballposY < paddle2.pos_y + 55) :
         ball.speedX *= -1
 
-    if (ball.ballposX <= 30 and ball.ballposY >= paddle1.pos_y - 10) and (ball.ballposX <= 30 and ball.ballposY <= paddle1.pos_y + 60) :
+    if (ball.ballposX == 30 and ball.ballposY > paddle1.pos_y - 5) and (ball.ballposX == 30 and ball.ballposY < paddle1.pos_y + 55) :
         ball.speedX *= -1
 
     clck.tick(30)
