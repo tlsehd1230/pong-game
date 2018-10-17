@@ -4,11 +4,11 @@ import pygame
 from point import Point
 import time
 
-class Ball:
+class Ball :
     def __init__(self) :
         self.ballposX = 400
         self.ballposY = 300
-        self.speedX = -5
+        self.speedX = 5
         self.speedY = 5
         self.nextdirection = -1
 
@@ -45,7 +45,6 @@ def send_pos(sock, paddle1, paddle2, addr, ball) :
     while True :
         sock.sendto((str(paddle1.pos_y)+","+str(paddle2.pos_y)+","+str(ball.ballposX)+","+str(ball.ballposY)).encode(), addr)
 
-
 clnt_address = init(sock)
 paddle1 = Point()
 paddle2 = Point()
@@ -53,7 +52,8 @@ ball = Ball()
 paddle1.pos_y = 275
 paddle2.pos_y = 275
 clck = pygame.time.Clock()
-
+player1_score = 0
+player2_score = 0
 
 t1 = threading.Thread(target = keyboard_listen, args = (sock, clnt_address, paddle1, paddle2))
 t2 = threading.Thread(target = send_pos, args = (sock, paddle1, paddle2, clnt_address[0], ball))
@@ -70,10 +70,24 @@ while True :
     if ball.ballposY <= 5 or ball.ballposY >= 595 :
         ball.speedY *= -1
 
-    if ball.ballposX <= 0 or ball.ballposX >= 790 :
+    if ball.ballposX <= 0 :
         ball.ballposX = 400
         ball.ballposY = 300
-        ball.speedX = 0
-        ball.speedY = 0
+        player2_score += 1
+        sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[0])
+        sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[1])
+
+    if ball.ballposX >= 790 :
+        ball.ballposX = 400
+        ball.ballposY = 300
+        player1_score += 1
+        sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[0])
+        sock.sendto((str(player1_score) + "," + str(player2_score)).encode(), clnt_address[1])
+
+    if (ball.ballposX >= 760 and ball.ballposY >= paddle2.pos_y - 10) and (ball.ballposX >= 770 and ball.ballposY <= paddle2.pos_y + 60) :
+        ball.speedX *= -1
+
+    if (ball.ballposX <= 30 and ball.ballposY >= paddle1.pos_y - 10) and (ball.ballposX <= 30 and ball.ballposY <= paddle1.pos_y + 60) :
+        ball.speedX *= -1
 
     clck.tick(30)

@@ -19,15 +19,23 @@ surface = pygame.display.set_mode((display_width, display_height))
 
 pygame.display.set_caption("pong-game")
 
-def listen(sock, player1, player2, ball) :
+def listen(sock, player1, player2, ball, score_list) :
     while True :
         data, addr = sock.recvfrom(1024)
-        result_list = data.decode().split(",")
-        result_list = list(map(int, result_list))
-        player1.pos_y = result_list[0]
-        player2.pos_y = result_list[1]
-        ball.pos_x = result_list[2]
-        ball.pos_y = result_list[3]
+        if len(data.decode()) > 10 :
+            result_list = data.decode().split(",")
+            result_list = list(map(int, result_list))
+            player1.pos_y = result_list[0]
+            player2.pos_y = result_list[1]
+            ball.pos_x = result_list[2]
+            ball.pos_y = result_list[3]
+
+        else :
+            result_list2 = data.decode().split(",")
+            result_list2 = list(map(int, result_list2))
+            print(data.decode())
+            score_list[0] = result_list2[0]
+            score_list[1] = result_list2[1]
 
 def main() :
 
@@ -44,8 +52,10 @@ def main() :
     player2.pos_y = 275
     ball.pos_x = 400
     ball.pos_y = 300
+    score_list = [0, 0]
+    font_40 = pygame.font.SysFont("D2Coding", 40)
 
-    t1 = threading.Thread(target=listen, args=(sock, player1, player2, ball))
+    t1 = threading.Thread(target=listen, args=(sock, player1, player2, ball, score_list))
     t1.start()
 
     while not gameover :
@@ -82,6 +92,8 @@ def main() :
         pygame.draw.rect(surface, (255, 255, 255), (player2.pos_x, player2.pos_y, 10, 50))
 
         pygame.draw.rect(surface, (255, 255, 255), (ball.pos_x-5, ball.pos_y-5, 10, 10))
+
+
 
         pygame.display.update()
         clck.tick(30)
